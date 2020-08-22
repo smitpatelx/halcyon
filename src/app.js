@@ -10,10 +10,24 @@ const api = require('./api');
 
 const app = express();
 
+let whitelist = ['http://localhost:9009','https://smitpatelx.com']
+let corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1 || !origin) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+}
+
 app.use(morgan('dev'));
 app.use(helmet());
-app.use(cors());
 app.use(express.json());
+app.use(cors());
+// app.use(cors({
+//   origin: 'http://localhost:8800'
+// }));
 
 app.get('/', (req, res) => {
   res.json({
