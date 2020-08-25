@@ -1,63 +1,66 @@
 const mongoose = require('mongoose');
 const findOrCreate = require('mongoose-find-or-create');
+const mongoosePaginate = require('mongoose-paginate');
 
 const contactSchema = new mongoose.Schema({
   first_name:{
     type: String,
     min: 2,
     max: 20,
-    lowercase: true
+    lowercase: true,
+    required: true
   },
   last_name:{
     type: String,
     min: 2,
     max: 20,
-    lowercase: true
+    lowercase: true,
+    required: true
   },
   email:{
     type: String,
     min:6,
     max:60,
     lowercase: true,
-    unique: false
-  },
-  email_verified:{
-    type: Boolean,
-    default: false
+    unique: false,
+    required: true
   },
   phone:{
     type: String,
     min:10,
     max:15,
+    required: true
   },
-  extension:{
+  country_code:{
     type: String,
-    min:2,
-    max:6,
+    max:2,
+    default:'ca',
+    lowercase: true,
   },
-  avatar:{
+  business_name:{
     type: String,
-    default: 'default.png'
+    min: 3, 
+    max: 50
   },
-  password:{
-    type: String
+  business_employees:{
+    type: Number,
+    min:2, 
+    max:10000
   },
-  google_id:{
+  est_budget:{
+    type: Number,
+    min:3000, 
+    max:200000
+  },
+  message:{
     type: String,
-    sparse: true
+    max: 1500
   },
-  google_token:{
-    type: String
-  },
-  google_refresh_token:{
-    type: String
-  },
-  github_id:{
+  ip_address:{
     type: String,
-    sparse: true
-  },
-  github_token:{
-    type: String
+    min: 8,
+    max: 20,
+    required: true
   },
   createdAt:{
     type: Date,
@@ -71,7 +74,8 @@ const contactSchema = new mongoose.Schema({
   timestamps: true
 });
 
-contactSchema.plugin(findOrCreate);
+contactSchema.plugin(mongoosePaginate);
+// contactSchema.plugin(findOrCreate);
 
 const Contact = mongoose.model('Contact', contactSchema);
 
