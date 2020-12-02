@@ -1,5 +1,4 @@
 const express = require('express');
-const { body, validationResult } = require('express-validator');
 const router = express.Router();
 const Contact = require('../../models/contact')
 const {validateNotEmpty} = require('../middlewares')

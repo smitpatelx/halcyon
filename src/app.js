@@ -27,7 +27,7 @@ let corsOptions = {
         callback(new Error('Not allowed by CORS'))
       }
     }
-  }
+  },
 }
 
 app.use(morgan('dev'));

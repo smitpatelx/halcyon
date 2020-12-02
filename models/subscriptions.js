@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const findOrCreate = require('mongoose-find-or-create');
 const mongoosePaginate = require('mongoose-paginate-v2');
 
-const contactSchema = new mongoose.Schema({
+const subscriptionSchema = new mongoose.Schema({
   first_name:{
     type: String,
     min: 2,
@@ -25,37 +25,6 @@ const contactSchema = new mongoose.Schema({
     unique: false,
     required: true
   },
-  phone:{
-    type: String,
-    min:10,
-    max:15,
-    required: true
-  },
-  country_code:{
-    type: String,
-    max:2,
-    default:'ca',
-    lowercase: true,
-  },
-  business_name:{
-    type: String,
-    min: 3, 
-    max: 50
-  },
-  business_employees:{
-    type: Number,
-    min:0, 
-    max:10000
-  },
-  est_budget:{
-    type: Number,
-    min:3000, 
-    max:200000
-  },
-  message:{
-    type: String,
-    max: 1500
-  },
   ip_address:{
     type: String,
     min: 8,
@@ -74,9 +43,9 @@ const contactSchema = new mongoose.Schema({
   timestamps: true
 });
 
-contactSchema.plugin(mongoosePaginate);
+subscriptionSchema.plugin(mongoosePaginate);
 // contactSchema.plugin(findOrCreate);
 
-const Contact = mongoose.model('Contact', contactSchema);
+const Subscription = mongoose.model('Subscription', subscriptionSchema);
 
-module.exports = Contact;
+module.exports = Subscription;
