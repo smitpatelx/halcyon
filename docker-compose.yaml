@@ -1,38 +1,38 @@
 version: '3.1'
 
 services:
-  halcyon:
-    container_name: halcyon-app
-    restart: always
-    build: .
-    environment: 
-      - NODE_ENV=${NODE_ENV}
-      - PORT=${PORT}
-      - MONGO_USER=${MONGO_USER}
-      - MONGO_PASS=${MONGO_PASS}
-      - MONGO_HOST=${MONGO_HOST}
-      - MONGO_PORT=${MONGO_PORT}
-      - MONGO_DB=${MONGO_DB}
-      - MAIL_DRIVER=${MAIL_DRIVER}
-      - MAIL_HOST=${MAIL_HOST}
-      - MAIL_PORT=${MAIL_PORT}
-      - MAIL_SECURE=${MAIL_SECURE}
-      - MAIL_USER=${MAIL_USER}
-      - MAIL_CREDENTIALS=${MAIL_CREDENTIALS}
-      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
-      - MAIL_FROM_NAME=${MAIL_FROM_NAME}
-      - MAILTRAP_HOST=${MAILTRAP_HOST}
-      - MAILTRAP_PORT=${MAILTRAP_PORT}
-      - MAILTRAP_SECURE=${MAILTRAP_SECURE}
-      - MAILTRAP_USER=${MAILTRAP_USER}
-      - MAILTRAP_CREDENTIALS=${MAILTRAP_CREDENTIALS}
-      - MAILCHIMP_KEY=${MAILCHIMP_KEY}
-      - MAILCHIMP_SERVER=${MAILCHIMP_SERVER}
-      - MAILCHIMP_DEFAULT_LIST_ID=${MAILCHIMP_DEFAULT_LIST_ID}
-    ports:
-      - '${PORT}:${PORT}'
-    links:
-      - mongo
+  # halcyon:
+  #   container_name: halcyon-app
+  #   restart: always
+  #   build: .
+  #   environment: 
+  #     - NODE_ENV=${NODE_ENV}
+  #     - PORT=${PORT}
+  #     - MONGO_USER=${MONGO_USER}
+  #     - MONGO_PASS=${MONGO_PASS}
+  #     - MONGO_HOST=${MONGO_HOST}
+  #     - MONGO_PORT=${MONGO_PORT}
+  #     - MONGO_DB=${MONGO_DB}
+  #     - MAIL_DRIVER=${MAIL_DRIVER}
+  #     - MAIL_HOST=${MAIL_HOST}
+  #     - MAIL_PORT=${MAIL_PORT}
+  #     - MAIL_SECURE=${MAIL_SECURE}
+  #     - MAIL_USER=${MAIL_USER}
+  #     - MAIL_CREDENTIALS=${MAIL_CREDENTIALS}
+  #     - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
+  #     - MAIL_FROM_NAME=${MAIL_FROM_NAME}
+  #     - MAILTRAP_HOST=${MAILTRAP_HOST}
+  #     - MAILTRAP_PORT=${MAILTRAP_PORT}
+  #     - MAILTRAP_SECURE=${MAILTRAP_SECURE}
+  #     - MAILTRAP_USER=${MAILTRAP_USER}
+  #     - MAILTRAP_CREDENTIALS=${MAILTRAP_CREDENTIALS}
+  #     - MAILCHIMP_KEY=${MAILCHIMP_KEY}
+  #     - MAILCHIMP_SERVER=${MAILCHIMP_SERVER}
+  #     - MAILCHIMP_DEFAULT_LIST_ID=${MAILCHIMP_DEFAULT_LIST_ID}
+  #   ports:
+  #     - '${PORT}:${PORT}'
+  #   links:
+  #     - mongo
 
   mongo:
     image: mongo

@@ -37,12 +37,12 @@ router.post('/',validateNotEmpty, async (req, res) => {
       message: req.body.message,
       ip_address: req.body.ip_address
     }).then(data=>{
+      res.status(200).json(data);
+    }).catch(err=>{
       res.status(401).json({
         error_message:'Error Creating User',
         err
       });
-    }).catch(err=>{
-      res.status(200).json(data);
     });
 });
 
