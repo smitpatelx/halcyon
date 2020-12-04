@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Subscription = require('../../models/subscriptions')
 const {validateNotEmptySubscription} = require('../middlewares')
+const { sendmail } = require('../../mail/sendmail')
+const { newSubscriber, changeStatus } = require('../../mail/mailchimp');
 
 /* GET - All Subscription */
 router.get('/', (req, res) => {
@@ -21,25 +23,38 @@ router.get('/', (req, res) => {
     });
 });
 
+// router.get('/', async (req, res) => {
+//     let text = "Hi this is just a test";
+//     let html = "<br/><hr/><br/><h1 style='color:#000;font-weight:500;font-size:2rem;'>Hi this is just a test</h1><br/><hr/><br/>"
+//     sendmail('smitpatel2x@gmail.com','Test 1', text, html)
+//     .then(data=>{
+//         res.status(200).json(data);
+//     })
+//     .catch(err=>{
+//         res.status(401).json(err);
+//     })
+// });
+
 /* POST - Create new Subscription */
 router.post('/',validateNotEmptySubscription, async (req, res) => {
     //Subscription Object
-    var newSubscription = await new Subscription({
+    await Subscription.syncIndexes();
+    await Subscription.create({
       first_name: req.body.first_name,
       last_name: req.body.last_name,
       email: req.body.email,
       ip_address: req.body.ip_address
-    });
-
-    newSubscription.save((err,data)=>{
-      if(err){
-        res.status(401).json({
-            error_message:'Error creating new subscription',
-            err
-        });
-      } else {
-        res.status(200).json(data);
-      }
+    }).then(data=>{
+      newSubscriber(data).then(data2=>{
+        res.status(200).json("Email subscription successful!");
+      }).catch(err2=>{
+        res.status(401).json(err2);
+      });
+    }).catch(err=>{
+      res.status(401).json({
+        error_message:'Error creating new subscription',
+        err
+      });
     });
 });
 
@@ -60,6 +75,30 @@ router.get('/:email', (req, res) => {
       res.json(data);
     }
   });
+});
+
+/* Delete - Specific Subscription */
+router.delete('/:email', (req, res) => {
+  let {email} = req.params;
+
+  Subscription.findOneAndDelete({email: email})
+  .then(data=>{
+    if(!data) {
+      res.status(400).json({
+        error: `Email ${data.email} doesn't exist in our database.`,
+      });
+    } else {
+      changeStatus(data.email).then(data2=>{
+        res.status(200).json(`Unsubscribe ${data.email} successful!`);
+      }).catch(err2=>{
+        res.status(401).json({error_message: `Unsubscribe to ${email} unsuccessful!`, error_data: err2})
+      })
+    }
+  }).catch(err=>{
+    res.status(400).json({
+      error: `Invalid Email : ${email}`,
+    });
+  })
 });
 
 module.exports = router;

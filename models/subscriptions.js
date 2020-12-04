@@ -22,7 +22,7 @@ const subscriptionSchema = new mongoose.Schema({
     min:6,
     max:60,
     lowercase: true,
-    unique: false,
+    unique: true,
     required: true
   },
   ip_address:{
@@ -44,7 +44,7 @@ const subscriptionSchema = new mongoose.Schema({
 });
 
 subscriptionSchema.plugin(mongoosePaginate);
-// contactSchema.plugin(findOrCreate);
+// subscriptionSchema.plugin(findOrCreate);
 
 const Subscription = mongoose.model('Subscription', subscriptionSchema);
 

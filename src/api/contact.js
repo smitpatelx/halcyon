@@ -24,7 +24,8 @@ router.get('/', (req, res) => {
 /* POST - Create new contact */
 router.post('/',validateNotEmpty, async (req, res) => {
     //Contact Object
-    var newContact = await new Contact({
+    await Contact.syncIndexes();
+    await Contact.create({
       first_name: req.body.first_name,
       last_name: req.body.last_name,
       email: req.body.email,
@@ -35,17 +36,13 @@ router.post('/',validateNotEmpty, async (req, res) => {
       est_budget: req.body.est_budget,
       message: req.body.message,
       ip_address: req.body.ip_address
-    });
-
-    newContact.save((err,data)=>{
-      if(err){
-        res.status(401).json({
-            error_message:'Error Creating User',
-            err
-        });
-      } else {
-        res.status(200).json(data);
-      }
+    }).then(data=>{
+      res.status(401).json({
+        error_message:'Error Creating User',
+        err
+      });
+    }).catch(err=>{
+      res.status(200).json(data);
     });
 });
 

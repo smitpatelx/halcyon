@@ -48,18 +48,10 @@ let validateNotEmpty = async (req, res, next)=>{
 
 // Validate Subscription Data
 let validateNotEmptySubscription = async (req, res, next)=>{
-  if(req.body.first_name){
-    await body('first_name').not().isEmpty().trim().escape().isAlpha().bail().isLength({ min: 2, max: 20 }).run(req)
-  }
-  if(req.body.last_name){
-    await body('last_name').not().isEmpty().trim().escape().isAlpha().bail().isLength({ min: 2, max: 20 }).run(req)
-  }
-  if(req.body.email){
-    await body('email').not().isEmpty().trim().escape().normalizeEmail().isEmail().run(req)
-  }
-  if(req.body.ip_address){
-    await body('ip_address').not().isEmpty().trim().escape().isLength({ min: 8, max:20 }).bail().isIP().run(req)
-  }
+  await body('first_name').not().isEmpty().trim().escape().isAlpha().bail().isLength({ min: 2, max: 20 }).run(req)
+  await body('last_name').not().isEmpty().trim().escape().isAlpha().bail().isLength({ min: 2, max: 20 }).run(req)
+  await body('email').not().isEmpty().trim().escape().normalizeEmail().isEmail().run(req)
+  await body('ip_address').not().isEmpty().trim().escape().isLength({ min: 8, max:20 }).bail().isIP().run(req)
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
