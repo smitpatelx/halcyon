@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const findOrCreate = require('mongoose-find-or-create');
-const mongoosePaginate = require('mongoose-paginate');
+const mongoosePaginate = require('mongoose-paginate-v2');
 
 const userSchema = new mongoose.Schema({
   first_name:{
@@ -29,6 +29,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  user_type:{
+    type: String,
+    min:3,
+    max:50,
+    lowercase: true,
+    default: 'client'
+  },
   createdAt:{
     type: Date,
     default: Date.now
@@ -42,7 +49,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.plugin(mongoosePaginate);
-// userSchema.plugin(findOrCreate);
+userSchema.plugin(findOrCreate);
 
 const User = mongoose.model('User', userSchema);
 

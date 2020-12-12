@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Contact = require('../../models/contact')
-const {validateNotEmpty} = require('../middlewares')
+const {validateContacts} = require('../../helpers/contacts')
+const { isLoggedIn, isAdmin } = require('../../helpers/auth')
 
 /* GET - All contacts */
-router.get('/', (req, res) => {
+router.get('/', isLoggedIn, isAdmin, (req, res) => {
   let config = {
     page: parseInt(req.query.page,10) || 1,
     limit: parseInt(req.query.limit,10) || 10,
@@ -22,7 +23,7 @@ router.get('/', (req, res) => {
 });
 
 /* POST - Create new contact */
-router.post('/',validateNotEmpty, async (req, res) => {
+router.post('/', validateContacts, async (req, res) => {
     //Contact Object
     await Contact.syncIndexes();
     await Contact.create({
@@ -47,7 +48,7 @@ router.post('/',validateNotEmpty, async (req, res) => {
 });
 
 /* GET - Specific Contact */
-router.get('/:id', (req, res) => {
+router.get('/:id', isLoggedIn, isAdmin, (req, res) => {
   let {id} = req.params;
 
   Contact.findById({_id: id}, (err, data)=>{
@@ -66,7 +67,7 @@ router.get('/:id', (req, res) => {
 });
 
 /* POST - Edit Contact */
-router.post('/:id', validateNotEmpty, (req, res) => {
+router.post('/:id', isLoggedIn, isAdmin, validateContacts, (req, res) => {
   let {id} = req.params;
 
   Contact.findByIdAndUpdate({_id: id}, req.body,
@@ -84,7 +85,7 @@ router.post('/:id', validateNotEmpty, (req, res) => {
 });
 
 /* DELETE - Delete Specific contact */
-router.delete('/:id', (req, res) => {
+router.delete('/:id', isLoggedIn, isAdmin, (req, res) => {
   let id = req.params.id;
 
   Contact.findOneAndDelete({ _id: id }, (err, data)=>{
@@ -105,22 +106,22 @@ router.delete('/:id', (req, res) => {
 });
 
 // Validate ID
-function isInt(value) {
-  var x;
-  return isNaN(value) ? !1 : (x = parseFloat(value), (0 | x) === x);
-}
+// function isInt(value) {
+//   var x;
+//   return isNaN(value) ? !1 : (x = parseFloat(value), (0 | x) === x);
+// }
 
 //Clean Obj
-const cleanEmpty = obj => {
-  if (Array.isArray(obj)) { 
-    return obj
-        .map(v => (v && typeof v === 'object') ? cleanEmpty(v) : v)
-        .filter(v => !(v == null)); 
-  } else { 
-    return Object.entries(obj)
-        .map(([k, v]) => [k, v && typeof v === 'object' ? cleanEmpty(v) : v])
-        .reduce((a, [k, v]) => (v == null ? a : (a[k]=v, a)), {});
-  } 
-}
+// const cleanEmpty = obj => {
+//   if (Array.isArray(obj)) { 
+//     return obj
+//         .map(v => (v && typeof v === 'object') ? cleanEmpty(v) : v)
+//         .filter(v => !(v == null)); 
+//   } else { 
+//     return Object.entries(obj)
+//         .map(([k, v]) => [k, v && typeof v === 'object' ? cleanEmpty(v) : v])
+//         .reduce((a, [k, v]) => (v == null ? a : (a[k]=v, a)), {});
+//   } 
+// }
 
 module.exports = router;

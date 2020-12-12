@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const Subscription = require('../../models/subscriptions')
-const {validateNotEmptySubscription} = require('../middlewares')
+const { validateSubscription } = require('../../helpers/subscription')
 const { sendmail } = require('../../mail/sendmail')
 const { newSubscriber, changeStatus } = require('../../mail/mailchimp');
+const { default: validator } = require('validator');
+const { isLoggedIn, isAdmin } = require('../../helpers/auth')
 
 /* GET - All Subscription */
-router.get('/', (req, res) => {
+router.get('/', isLoggedIn, isAdmin, (req, res) => {
     let config = {
         page: parseInt(req.query.page,10) || 1,
         limit: parseInt(req.query.limit,10) || 10,
@@ -36,7 +38,7 @@ router.get('/', (req, res) => {
 // });
 
 /* POST - Create new Subscription */
-router.post('/',validateNotEmptySubscription, async (req, res) => {
+router.post('/', validateSubscription, async (req, res) => {
     //Subscription Object
     await Subscription.syncIndexes();
     await Subscription.create({
@@ -59,8 +61,10 @@ router.post('/',validateNotEmptySubscription, async (req, res) => {
 });
 
 /* GET - Specific Subscription */
-router.get('/:email', (req, res) => {
-  let {email} = req.params;
+router.get('/:email', isLoggedIn, isAdmin, async (req, res) => {
+  const {email} = req.params;
+  isEmailValid = await validator.isEmail(email);
+  if(!isEmailValid) { res.status(401).json("Email is invalid") }
 
   Subscription.findOne({email: email}, (err, data)=>{
     if(err){
@@ -78,7 +82,7 @@ router.get('/:email', (req, res) => {
 });
 
 /* Delete - Specific Subscription */
-router.delete('/:email', (req, res) => {
+router.delete('/:email', isLoggedIn, isAdmin, (req, res) => {
   let {email} = req.params;
 
   Subscription.findOneAndDelete({email: email})
@@ -99,6 +103,7 @@ router.delete('/:email', (req, res) => {
       error: `Invalid Email : ${email}`,
     });
   })
+
 });
 
 module.exports = router;

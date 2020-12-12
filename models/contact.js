@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const findOrCreate = require('mongoose-find-or-create');
 const mongoosePaginate = require('mongoose-paginate-v2');
 
 const contactSchema = new mongoose.Schema({
