@@ -2,11 +2,13 @@ version: '3.8'
 
 services:
   halcyon:
-    container_name: halcyon-app
+    container_name: halcyon-app-${NODE_ENV}
     restart: always
+    env_file:
+      - ./dev.env
     build:
       context: .
-      target: prod
+      target: dev
     environment: 
       - NODE_ENV=${NODE_ENV}
       - PORT=${PORT}

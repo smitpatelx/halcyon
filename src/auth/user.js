@@ -70,7 +70,7 @@ router.delete('/user/:id', isLoggedIn, isAdmin, async (req, res) => {
       } else {
         User.findOneAndDelete({_id: id})
         .then(data=>{
-          res.status(200).json(`User id: ${data._id} deleted successfully!`);
+          res.status(200).json({ message: `User id: ${data._id} deleted successfully!`});
         }).catch(err=>{
           res.status(400).json({
             error_message: `Invalid userId : ${id}`,

@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
+const cookieParser = require('cookie-parser')
 
 require('dotenv').config();
 env = process.env;
@@ -34,6 +35,7 @@ let corsOptions = {
 
 app.use(morgan('dev'));
 app.use(helmet());
+app.use(cookieParser())
 app.use(express.json());
 app.use(cors(corsOptions));
 
