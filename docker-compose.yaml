@@ -8,7 +8,8 @@ services:
       context: .
       target: prod
     environment: 
-      - NODE_ENV=${NODE_ENV}
+      - NODE_ENV=production
+      - CORS_ALLOWED=${CORS_ALLOWED}
       - PORT=${PORT}
       - MONGO_USER=${MONGO_USER}
       - MONGO_PASS=${MONGO_PASS}

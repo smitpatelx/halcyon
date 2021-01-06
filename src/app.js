@@ -14,7 +14,12 @@ const auth = require('./auth');
 
 const app = express();
 
-let whitelist = [`http://127.0.0.1:${process.env.PORT}`,'https://smitpatelx.com']
+app.use((req,res,next)=>{
+  res.header("Access-Control-Allow-Credentials", true)
+  next();
+});
+
+let whitelist = process.env.CORS_ALLOWED.split(",")
 let corsOptions = {
   origin: function (origin, callback) {
     if(env.NODE_ENV == 'development') {

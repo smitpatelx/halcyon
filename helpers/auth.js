@@ -3,7 +3,19 @@ const User = require('../models/user')
 const AuthToken = require('../models/authtokens')
 const { RERFRESH_TOKEN_EXPIRE_TIME, TOKEN_EXPIRE_TIME, JWT_SECRET, JWT_REFRESH_SECRET} = process.env;
 const jwt = require('jsonwebtoken')
-const cookie = require("cookie")
+const cookie = require('cookie');
+const cookieOptions = (maxAgeVal)=>{
+    const maxAgeParsed = maxAgeVal ? maxAgeVal : eval(process.env.COOKIE_EXPIRY);
+    const expDate = new Date(Number(new Date()) + maxAgeParsed); 
+    return {
+        domain: process.env.COOKIE_DOMAIN,
+        expires: expDate,
+        maxAge: maxAgeParsed,
+        httpOnly: true,
+        sameSite: 'Strict',
+        secure: process.env.NODE_ENV!=="development"
+    }
+}
 
 //Validate if variable exist
 const validateLogin = async (req, res, next)=>{
@@ -51,7 +63,7 @@ const generateToken = async(user)=>{
         }, (err, data)=>{
           if(data){
             //Return new/existing token
-            resolve({token: 'JWT '+token, refreshToken: data.refresh_token })
+            resolve({token: token, refreshToken: data.refresh_token })
           } else {
             //Throw RefreshToken findOrCreate error
             reject({default:"RefreshToken findOrCreate error"})
@@ -62,7 +74,7 @@ const generateToken = async(user)=>{
   })
 }
 
-const getRefreshToken = async(refreshToken)=>{
+const refreshAccessToken = async(refreshToken)=>{
   const data = jwt.decode(refreshToken, {complete: true});
   const userObj = data.payload.userObj;
 
@@ -86,7 +98,7 @@ const getRefreshToken = async(refreshToken)=>{
           reject({errorCode:'REFRESH_TOKEN_INVALID', error_data: err})
         }
       } else {
-        resolve({token: 'JWT '+token, refreshToken: refreshToken});
+        resolve({token: token, refreshToken: refreshToken});
       }
     })
   })
@@ -95,13 +107,26 @@ const getRefreshToken = async(refreshToken)=>{
 const isLoggedIn = (req, res, next)=>{
   if(typeof req.headers.cookie === "undefined") { res.status(400).json({error_message: "Header cookies undefined"}) }
   try {
-    const cookies = JSON.parse(cookie.parse(req.headers.cookie).jwtauth);
-    const token = cookies.token.split(" ")[1];
+    const cookies = cookie.parse(req.headers.cookie);
+    const token = cookies['x-access-token'];
+    const refreshToken = cookies['x-refresh-token'];
     jwt.verify(token, JWT_SECRET, async (err, data)=>{
       if(err){
         if(err.name=='TokenExpiredError'){
-          res.status(403).json({error_message:"Token Expired!"});
+          // Generate new token and send it
+          await refreshAccessToken(refreshToken).then(data=>{
+            const newTokensInCookies = cookie.serialize('x-access-token', data.token, cookieOptions());
+            req.headers.cookie = newTokensInCookies;
+            res.setHeader('Set-Cookie', [
+              newTokensInCookies, 
+            ]);
+            // res.status(200).json({message: "Done!"});
+            next();
+          }).catch(err=>{
+            res.status(403).json({error_message:"Please try again!", error_data: err})
+          })
         } else {
+          console.log("isLoggedIn Error : ",err)
           res.status(401).json({error_message:"Invalid token provided!"});
         }
       } else {
@@ -109,6 +134,7 @@ const isLoggedIn = (req, res, next)=>{
       }
     });
   } catch (err) {
+    console.log(err)
     res.status(400).json({error_message: "Unauthorised access blocked!"})
   }
 }
@@ -116,8 +142,8 @@ const isLoggedIn = (req, res, next)=>{
 const isAdmin = (req, res, next)=>{
   if(typeof req.headers.cookie === "undefined") { res.status(400).json({error_message: "Header cookies undefined"}) }
   try {
-    const cookies = JSON.parse(cookie.parse(req.headers.cookie).jwtauth);
-    const token = cookies.token.split(" ")[1];
+    const cookies = cookie.parse(req.headers.cookie);
+    const token = cookies['x-access-token'];
     jwt.verify(token, JWT_SECRET, (err, data)=>{
       if(err){
         if(err.name=='TokenExpiredError'){
@@ -138,4 +164,4 @@ const isAdmin = (req, res, next)=>{
   }
 }
 
-module.exports = { validateLogin, generateToken, isLoggedIn, isAdmin, getRefreshToken }
+module.exports = { validateLogin, generateToken, isLoggedIn, isAdmin, refreshAccessToken }

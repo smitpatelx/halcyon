@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon ./src/index.js",
-    "cdev": "docker-compose -f docker-compose-dev.yaml up -d",
+    "dc-up-d": "docker-compose -f docker-compose-dev.yaml up -d",
+    "dc-up": "docker-compose -f docker-compose-dev.yaml up",
+    "dc-s": "docker-compose -f docker-compose-dev.yaml up -d",
     "cs": "docker-compose -f docker-compose-dev.yaml down",
     "lint": "eslint --fix src",
     "test": "mocha --exit"

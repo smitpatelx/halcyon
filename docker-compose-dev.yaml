@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   halcyon:
-    container_name: halcyon-app-${NODE_ENV}
+    container_name: halcyon-app-dev
     restart: always
     env_file:
       - ./dev.env
@@ -10,7 +10,8 @@ services:
       context: .
       target: dev
     environment: 
-      - NODE_ENV=${NODE_ENV}
+      - NODE_ENV=development
+      - CORS_ALLOWED=${CORS_ALLOWED}
       - PORT=${PORT}
       - MONGO_USER=${MONGO_USER}
       - MONGO_PASS=${MONGO_PASS}
