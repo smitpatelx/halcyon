@@ -8,8 +8,8 @@
     "dev": "nodemon ./src/index.js",
     "dc-up-d": "docker-compose -f docker-compose-dev.yaml up -d",
     "dc-up": "docker-compose -f docker-compose-dev.yaml up",
-    "dc-s": "docker-compose -f docker-compose-dev.yaml up -d",
-    "cs": "docker-compose -f docker-compose-dev.yaml down",
+    "dc-s": "docker-compose -f docker-compose-dev.yaml down",
+    "dc-down": "docker-compose -f docker-compose-dev.yaml down",
     "lint": "eslint --fix src",
     "test": "mocha --exit"
   },

@@ -1,4 +1,3 @@
-
 /* eslint-disable no-unused-vars */
 function errorHandler(err, req, res, next) {
   /* eslint-enable no-unused-vars */

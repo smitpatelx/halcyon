@@ -13,7 +13,8 @@ const cookieOptions = (maxAgeVal)=>{
         maxAge: maxAgeParsed,
         httpOnly: true,
         sameSite: 'Strict',
-        secure: process.env.NODE_ENV!=="development"
+        secure: process.env.NODE_ENV!=="development",
+        path: '/'
     }
 }
 
@@ -63,9 +64,9 @@ const generateToken = async(user)=>{
         }, (err, data)=>{
           if(data){
             //Return new/existing token
-            resolve({token: token, refreshToken: data.refresh_token })
+            resolve({token: token, refreshToken: newRefreshToken })
           } else {
-            //Throw RefreshToken findOrCreate error
+            //Throw Refresh Token findOrCreate error
             reject({default:"RefreshToken findOrCreate error"})
           }
         })
@@ -81,31 +82,30 @@ const refreshAccessToken = async(refreshToken)=>{
   const token = jwt.sign({userObj}, JWT_SECRET, { expiresIn: TOKEN_EXPIRE_TIME });
   
   return new Promise((resolve, reject)=>{
-    jwt.verify(refreshToken, JWT_REFRESH_SECRET, (err, data)=>{
-      if(err){
-        if(err.name=='TokenExpiredError'){
-          reject("Please login again!");
-          // AuthToken.findOne({user_id: userObj._id}, (err, data)=>{
-          //   if(data){
-          //     //Return new JWT token & Old refresh token
-          //     resolve({token: 'JWT '+token, refreshToken: data.refresh_token })
-          //   } else {
-          //     //Throw RefreshToken findOrCreate error
-          //     reject("Please login again!")
-          //   }
-          // })
-        } else {
-          reject({errorCode:'REFRESH_TOKEN_INVALID', error_data: err})
-        }
-      } else {
-        resolve({token: token, refreshToken: refreshToken});
-      }
-    })
+    // Find token
+    AuthToken.findById(userObj._id)
+      .then(data=>{
+        jwt.verify(refreshToken, JWT_REFRESH_SECRET, (err, data)=>{
+          if(err){
+            if(err.name=='TokenExpiredError'){
+              reject("Please login again!");
+            } else {
+              reject({errorCode:'REFRESH_TOKEN_INVALID', error_data: err})
+            }
+          } else {
+            resolve({token: token, refreshToken: refreshToken});
+          }
+        })
+      })
+      .catch(err=>{
+        reject({errorCode:'FORCE_LOGOUT'})
+      })
+
   })
 }
 
 const isLoggedIn = (req, res, next)=>{
-  if(typeof req.headers.cookie === "undefined") { res.status(400).json({error_message: "Header cookies undefined"}) }
+  if(typeof req.headers.cookie === "undefined") { res.status(401).json({error_message: "Header cookies undefined"}) }
   try {
     const cookies = cookie.parse(req.headers.cookie);
     const token = cookies['x-access-token'];
@@ -120,10 +120,9 @@ const isLoggedIn = (req, res, next)=>{
             res.setHeader('Set-Cookie', [
               newTokensInCookies, 
             ]);
-            // res.status(200).json({message: "Done!"});
             next();
           }).catch(err=>{
-            res.status(403).json({error_message:"Please try again!", error_data: err})
+            res.status(401).json({error_message:"Please try again!", error_data: err})
           })
         } else {
           console.log("isLoggedIn Error : ",err)
@@ -135,19 +134,19 @@ const isLoggedIn = (req, res, next)=>{
     });
   } catch (err) {
     console.log(err)
-    res.status(400).json({error_message: "Unauthorised access blocked!"})
+    res.status(401).json({error_message: "Unauthorised access blocked!"})
   }
 }
 
 const isAdmin = (req, res, next)=>{
-  if(typeof req.headers.cookie === "undefined") { res.status(400).json({error_message: "Header cookies undefined"}) }
+  if(typeof req.headers.cookie === "undefined") { res.status(401).json({error_message: "Header cookies undefined"}) }
   try {
     const cookies = cookie.parse(req.headers.cookie);
     const token = cookies['x-access-token'];
     jwt.verify(token, JWT_SECRET, (err, data)=>{
       if(err){
         if(err.name=='TokenExpiredError'){
-          res.status(403).json({error_message:"Token Expired!"});
+          res.status(401).json({error_message:"Token Expired!"});
         } else {
           res.status(401).json({error_message:"Invalid token provided!"});
         }
@@ -160,7 +159,7 @@ const isAdmin = (req, res, next)=>{
       }
     });
   } catch (err) {
-    res.status(400).json({error_message: "Unauthorised access blocked!"})
+    res.status(401).json({error_message: "Unauthorised access blocked!"})
   }
 }
 

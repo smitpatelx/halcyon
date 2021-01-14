@@ -5,45 +5,10 @@ services:
     container_name: halcyon-app-dev
     restart: always
     env_file:
-      - ./dev.env
+      - ./.env.dev
     build:
       context: .
       target: dev
-    environment: 
-      - NODE_ENV=development
-      - CORS_ALLOWED=${CORS_ALLOWED}
-      - PORT=${PORT}
-      - MONGO_USER=${MONGO_USER}
-      - MONGO_PASS=${MONGO_PASS}
-      - MONGO_HOST=${MONGO_HOST}
-      - MONGO_PORT=${MONGO_PORT}
-      - MONGO_DB=${MONGO_DB}
-      - MAIL_DRIVER=${MAIL_DRIVER}
-      - MAIL_HOST=${MAIL_HOST}
-      - MAIL_PORT=${MAIL_PORT}
-      - MAIL_SECURE=${MAIL_SECURE}
-      - MAIL_USER=${MAIL_USER}
-      - MAIL_CREDENTIALS=${MAIL_CREDENTIALS}
-      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
-      - MAIL_FROM_NAME=${MAIL_FROM_NAME}
-      - MAILTRAP_HOST=${MAILTRAP_HOST}
-      - MAILTRAP_PORT=${MAILTRAP_PORT}
-      - MAILTRAP_SECURE=${MAILTRAP_SECURE}
-      - MAILTRAP_USER=${MAILTRAP_USER}
-      - MAILTRAP_CREDENTIALS=${MAILTRAP_CREDENTIALS}
-      - MAILCHIMP_KEY=${MAILCHIMP_KEY}
-      - MAILCHIMP_SERVER=${MAILCHIMP_SERVER}
-      - MAILCHIMP_DEFAULT_LIST_ID=${MAILCHIMP_DEFAULT_LIST_ID}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      - TOKEN_EXPIRE_TIME=${TOKEN_EXPIRE_TIME}
-      - RERFRESH_TOKEN_EXPIRE_TIME=${RERFRESH_TOKEN_EXPIRE_TIME}
-      - ADMIN_FIRST_NAME=${ADMIN_FIRST_NAME}
-      - ADMIN_LAST_NAME=${ADMIN_LAST_NAME}
-      - ADMIN_EMAIL=${ADMIN_EMAIL}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
-      - ADMIN_RENEW=${ADMIN_RENEW}
-      - SALT_ROUNDS=${SALT_ROUNDS}
     ports:
       - '${PORT}:${PORT}'
     volumes: 

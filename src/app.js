@@ -2,45 +2,44 @@ const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 
 require('dotenv').config();
+
 env = process.env;
 
 const middlewares = require('./middlewares');
-const {notFound} = require('../helpers/404')
+const { notFound } = require('../helpers/404');
 const api = require('./api');
 const auth = require('./auth');
 
 const app = express();
 
-app.use((req,res,next)=>{
-  res.header("Access-Control-Allow-Credentials", true)
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', true);
   next();
 });
 
-let whitelist = process.env.CORS_ALLOWED.split(",")
-let corsOptions = {
-  origin: function (origin, callback) {
-    if(env.NODE_ENV == 'development') {
+const whitelist = process.env.CORS_ALLOWED.split(',');
+const corsOptions = {
+  origin(origin, callback) {
+    if (env.NODE_ENV == 'development') {
       if (whitelist.indexOf(origin) !== -1 || !origin) {
-        callback(null, true)
+        callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'))
+        callback(new Error('Not allowed by CORS'));
       }
+    } else if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
     } else {
-      if (whitelist.indexOf(origin) !== -1) {
-        callback(null, true)
-      } else {
-        callback(new Error('Not allowed by CORS'))
-      }
+      callback(new Error('Not allowed by CORS'));
     }
   },
-}
+};
 
 app.use(morgan('dev'));
 app.use(helmet());
-app.use(cookieParser())
+app.use(cookieParser());
 app.use(express.json());
 app.use(cors(corsOptions));
 
