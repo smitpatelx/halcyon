@@ -19,7 +19,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const whitelist = process.env.CORS_ALLOWED.split(',');
+const whitelist = env.CORS_ALLOWED.split(',');
 const corsOptions = {
   origin(origin, callback) {
     if (env.NODE_ENV === 'development') {
@@ -28,10 +28,12 @@ const corsOptions = {
       } else {
         callback(new Error('Not allowed by CORS'));
       }
-    } else if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      if (whitelist.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
     }
   },
   allowedHeaders: ['Accept-Version', 'Authorization', 'Credentials', 'Content-Type'],
