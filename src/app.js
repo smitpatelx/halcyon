@@ -5,7 +5,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 require('dotenv').config();
-const { env } = process;
+env = process.env;
 
 const middlewares = require('./middlewares');
 const { notFound } = require('../helpers/404');
