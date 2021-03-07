@@ -13,7 +13,7 @@ router.get('/', isLoggedIn, isAdmin, (req, res) => {
   };
   Contact.paginate({}, config, (err, data) => {
     if (err) {
-      res.status(401).json({
+      res.status(500).json({
         error: 'Pagination error',
         details: err
       });
@@ -39,9 +39,9 @@ router.post('/', validateContacts, async (req, res) => {
     message: req.body.message,
     ip_address: req.body.ip_address
   }).then((data) => {
-    res.status(200).json(data);
+    res.status(201).json(data);
   }).catch((err) => {
-    res.status(401).json({
+    res.status(500).json({
       error_message: 'Error Creating User',
       err
     });
@@ -54,11 +54,11 @@ router.get('/:id', isLoggedIn, isAdmin, (req, res) => {
 
   Contact.findById({ _id: id }, (err, data) => {
     if (err) {
-      res.status(400).json({
+      res.status(500).json({
         error: `Invalid ID : ${id}`,
       });
     } else if (data == null) {
-      res.status(400).json({
+      res.status(500).json({
         error: `ID ${id} doesn't exist in our database.`,
       });
     } else {
@@ -76,7 +76,7 @@ router.post('/:id', isLoggedIn, isAdmin, validateContacts, (req, res) => {
       new: true
     }, (err, data) => {
       if (err) {
-        res.status(400).json({
+        res.status(500).json({
           error: `Invalid ID : ${id}`,
         });
       } else {
@@ -91,11 +91,11 @@ router.delete('/:id', isLoggedIn, isAdmin, (req, res) => {
 
   Contact.findOneAndDelete({ _id: id }, (err, data) => {
     if (err) {
-      res.status(400).json({
+      res.status(500).json({
         error: `Invalid ID : ${id}`,
       });
     } else if (data == null) {
-      res.status(400).json({
+      res.status(500).json({
         error: `ID ${id} doesn't exist in our database.`,
       });
     } else {
