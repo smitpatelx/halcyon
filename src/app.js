@@ -14,6 +14,11 @@ const auth = require('./auth');
 
 const app = express();
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', true);
+  next();
+});
+
 const whitelist = env.CORS_ALLOWED.split(',');
 const corsOptions = {
   origin(origin, callback) {
