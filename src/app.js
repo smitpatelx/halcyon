@@ -5,8 +5,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 require('dotenv').config();
-
-env = process.env;
+const { env } = process;
 
 const middlewares = require('./middlewares');
 const { notFound } = require('../helpers/404');
@@ -23,7 +22,7 @@ app.use((req, res, next) => {
 const whitelist = process.env.CORS_ALLOWED.split(',');
 const corsOptions = {
   origin(origin, callback) {
-    if (env.NODE_ENV == 'development') {
+    if (env.NODE_ENV === 'development') {
       if (whitelist.indexOf(origin) !== -1 || !origin) {
         callback(null, true);
       } else {
@@ -35,6 +34,7 @@ const corsOptions = {
       callback(new Error('Not allowed by CORS'));
     }
   },
+  allowedHeaders: ['Accept-Version', 'Authorization', 'Credentials', 'Content-Type'],
 };
 
 app.use(morgan('dev'));

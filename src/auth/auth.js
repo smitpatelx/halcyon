@@ -1,5 +1,10 @@
 const express = require('express');
 
+const { JWT_SECRET } = process.env;
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const cookie = require('cookie');
+
 const router = express.Router();
 const User = require('../../models/user');
 const AuthToken = require('../../models/authtokens');
@@ -7,10 +12,6 @@ const {
   validateLogin, generateToken, refreshAccessToken, isLoggedIn
 } = require('../../helpers/auth');
 
-const { JWT_SECRET } = process.env;
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const cookie = require('cookie');
 
 const cookieOptions = (maxAgeVal) => {
   const maxAgeParsed = maxAgeVal || eval(process.env.COOKIE_EXPIRY);
