@@ -12,9 +12,8 @@ const {
   validateLogin, generateToken, refreshAccessToken, isLoggedIn
 } = require('../../helpers/auth');
 
-
 const cookieOptions = (maxAgeVal) => {
-  const maxAgeParsed = maxAgeVal || eval(process.env.COOKIE_EXPIRY);
+  const maxAgeParsed = maxAgeVal || process.env.COOKIE_EXPIRY;
   const expDate = new Date(Number(new Date()) + maxAgeParsed);
   return {
     domain: process.env.COOKIE_DOMAIN,
@@ -22,7 +21,7 @@ const cookieOptions = (maxAgeVal) => {
     maxAge: maxAgeParsed,
     httpOnly: true,
     sameSite: 'Strict',
-    secure: process.env.NODE_ENV !== 'development',
+    secure: Boolean(process.env.NODE_ENV !== 'development'),
     path: '/'
   };
 };
@@ -143,7 +142,7 @@ router.post('/logout', isLoggedIn, async (req, res) => {
       res.status(300).json({ error_message: 'Error deleting AuthToken!' });
     } else {
       // Unset Cookie
-      res.setHeader('Set-Cookie', [cookie.serialize('x-access-token', '', cookieOptions(-1)), 
+      res.setHeader('Set-Cookie', [cookie.serialize('x-access-token', '', cookieOptions(-1)),
         cookie.serialize('x-refresh-token', '', cookieOptions(-1))]);
       res.status(200).json({ message: 'AuthToken deleted successfully!' });
     }

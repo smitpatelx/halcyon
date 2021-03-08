@@ -1,16 +1,16 @@
 /* eslint-disable max-len */
 const { body, validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
+const cookie = require('cookie');
 const User = require('../models/user');
 const AuthToken = require('../models/authtokens');
 
 const {
   RERFRESH_TOKEN_EXPIRE_TIME, TOKEN_EXPIRE_TIME, JWT_SECRET, JWT_REFRESH_SECRET
 } = process.env;
-const jwt = require('jsonwebtoken');
-const cookie = require('cookie');
 
 const cookieOptions = (maxAgeVal) => {
-  const maxAgeParsed = maxAgeVal || eval(process.env.COOKIE_EXPIRY);
+  const maxAgeParsed = maxAgeVal || process.env.COOKIE_EXPIRY;
   const expDate = new Date(Number(new Date()) + maxAgeParsed);
   return {
     domain: process.env.COOKIE_DOMAIN,
@@ -18,7 +18,7 @@ const cookieOptions = (maxAgeVal) => {
     maxAge: maxAgeParsed,
     httpOnly: true,
     sameSite: 'Strict',
-    secure: process.env.NODE_ENV !== 'development',
+    secure: Boolean(process.env.NODE_ENV !== 'development'),
     path: '/'
   };
 };
