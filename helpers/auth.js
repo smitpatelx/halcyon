@@ -10,7 +10,7 @@ const {
 } = process.env;
 
 const cookieOptions = (maxAgeVal) => {
-  const maxAgeParsed = maxAgeVal || process.env.COOKIE_EXPIRY;
+  const maxAgeParsed = maxAgeVal || Number(process.env.COOKIE_EXPIRY);
   const expDate = new Date(Number(new Date()) + maxAgeParsed);
   return {
     domain: process.env.COOKIE_DOMAIN,

@@ -13,7 +13,7 @@ const {
 } = require('../../helpers/auth');
 
 const cookieOptions = (maxAgeVal) => {
-  const maxAgeParsed = maxAgeVal || process.env.COOKIE_EXPIRY;
+  const maxAgeParsed = maxAgeVal || Number(process.env.COOKIE_EXPIRY);
   const expDate = new Date(Number(new Date()) + maxAgeParsed);
   return {
     domain: process.env.COOKIE_DOMAIN,
@@ -38,6 +38,7 @@ router.post('/login', validateLogin, async (req, res) => {
         delete user.password; // Deleting password
         // Generating new token
         generateToken(data).then((data) => {
+          console.log(cookieOptions())
           res.setHeader('Set-Cookie', [
             cookie.serialize('x-access-token', data.token, cookieOptions()),
             cookie.serialize('x-refresh-token', data.refreshToken, cookieOptions())
