@@ -3,24 +3,24 @@ const findOrCreate = require('mongoose-find-or-create');
 const mongoosePaginate = require('mongoose-paginate-v2');
 
 const userSchema = new mongoose.Schema({
-  first_name:{
+  first_name: {
     type: String,
     min: 2,
     max: 20,
     lowercase: true,
     required: true
   },
-  last_name:{
+  last_name: {
     type: String,
     min: 2,
     max: 20,
     lowercase: true,
     required: true
   },
-  email:{
+  email: {
     type: String,
-    min:6,
-    max:60,
+    min: 6,
+    max: 60,
     lowercase: true,
     unique: false,
     required: true
@@ -29,18 +29,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  user_type:{
+  user_type: {
     type: String,
-    min:3,
-    max:50,
+    min: 3,
+    max: 50,
     lowercase: true,
     default: 'client'
   },
-  createdAt:{
+  createdAt: {
     type: Date,
     default: Date.now
   },
-  updatedAt:{
+  updatedAt: {
     type: Date,
     default: Date.now
   }

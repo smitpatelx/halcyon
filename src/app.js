@@ -3,9 +3,7 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-
-require('dotenv').config();
-env = process.env;
+const env = require('../helpers/config');
 
 const middlewares = require('./middlewares');
 const { notFound } = require('../helpers/404');
@@ -28,12 +26,10 @@ const corsOptions = {
       } else {
         callback(new Error('Not allowed by CORS'));
       }
+    } else if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
     } else {
-      if (whitelist.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
+      callback(new Error('Not allowed by CORS'));
     }
   },
   allowedHeaders: ['Accept-Version', 'Authorization', 'Credentials', 'Content-Type'],

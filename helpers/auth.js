@@ -4,21 +4,18 @@ const jwt = require('jsonwebtoken');
 const cookie = require('cookie');
 const User = require('../models/user');
 const AuthToken = require('../models/authtokens');
-
-const {
-  RERFRESH_TOKEN_EXPIRE_TIME, TOKEN_EXPIRE_TIME, JWT_SECRET, JWT_REFRESH_SECRET
-} = process.env;
+const env = require('./config');
 
 const cookieOptions = (maxAgeVal) => {
-  const maxAgeParsed = maxAgeVal || Number(process.env.COOKIE_EXPIRY);
+  const maxAgeParsed = maxAgeVal || Number(env.COOKIE_EXPIRY);
   const expDate = new Date(Number(new Date()) + maxAgeParsed);
   return {
-    domain: process.env.COOKIE_DOMAIN,
+    domain: env.COOKIE_DOMAIN,
     expires: expDate,
     maxAge: maxAgeParsed,
     httpOnly: true,
     sameSite: 'Strict',
-    secure: Boolean(process.env.NODE_ENV !== 'development'),
+    secure: Boolean(env.NODE_ENV !== 'development'),
     path: '/'
   };
 };
@@ -30,15 +27,17 @@ const validateLogin = async (req, res, next) => {
     .bail()
     .custom(async (value) => {
       let newError;
-      await User.findOne({ email: value }).then((res) => {
-        if (res) {
+      await User.findOne({ email: value }).then((res2) => {
+        if (res2) {
           newError = false;
         } else {
           newError = true;
         }
       });
 
+      // eslint-disable-next-line prefer-promise-reject-errors
       if (newError) { return Promise.reject("E-mail doesn't exist"); }
+      return true;
     })
     .run(req);
 
@@ -50,7 +49,7 @@ const validateLogin = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(401).json({ errors: errors.array() });
   }
-  next();
+  return next();
 };
 
 // Generate JWT Token
@@ -59,24 +58,26 @@ const generateToken = async (user) => {
   delete userObj.password; // Deleting password
   return new Promise((resolve, reject) => {
     // Sign asynchronously
-    jwt.sign({ userObj }, JWT_SECRET, { expiresIn: TOKEN_EXPIRE_TIME }, (err, token) => {
+    jwt.sign({ userObj }, env.JWT_SECRET, { expiresIn: env.TOKEN_EXPIRE_TIME }, (err, token) => {
       if (err) {
+        // eslint-disable-next-line prefer-promise-reject-errors
         reject({ default: 'Error creating JWT token!', err });
       } else {
         // Create a refresh token incase we need it
-        const newRefreshToken = jwt.sign({ userObj }, JWT_REFRESH_SECRET, { expiresIn: RERFRESH_TOKEN_EXPIRE_TIME });
+        const newRefreshToken = jwt.sign({ userObj }, env.JWT_REFRESH_SECRET, { expiresIn: env.RERFRESH_TOKEN_EXPIRE_TIME });
         // Find or create a refresh token
         AuthToken.findOrCreate({ user_id: userObj._id }, {
           user_id: userObj._id,
           refresh_token: newRefreshToken
-        }, (err, data) => {
+        }, (_err, data) => {
           if (data) {
             // Return new/existing token
             resolve({ token, refreshToken: newRefreshToken });
           } else {
             // Throw Refresh Token findOrCreate error
-            reject({ default: 'RefreshToken findOrCreate error' });
+            return new Promise.Reject({ default: 'RefreshToken findOrCreate error' });
           }
+          return null;
         });
       }
     });
@@ -87,27 +88,23 @@ const refreshAccessToken = async (refreshToken) => {
   const data = jwt.decode(refreshToken, { complete: true });
   const { userObj } = data.payload;
 
-  const token = jwt.sign({ userObj }, JWT_SECRET, { expiresIn: TOKEN_EXPIRE_TIME });
+  const token = jwt.sign({ userObj }, env.JWT_SECRET, { expiresIn: env.TOKEN_EXPIRE_TIME });
 
   return new Promise((resolve, reject) => {
     // Find token
     AuthToken.findById(userObj._id)
-      .then((data) => {
-        jwt.verify(refreshToken, JWT_REFRESH_SECRET, (err, data) => {
+      .then((_d1) => {
+        jwt.verify(refreshToken, env.JWT_REFRESH_SECRET, (err, _d2) => {
           if (err) {
-            if (err.name == 'TokenExpiredError') {
-              reject('Please login again!');
-            } else {
-              reject({ errorCode: 'REFRESH_TOKEN_INVALID', error_data: err });
+            if (err.name === 'TokenExpiredError') {
+              return Promise.Rejectreject('Please login again!');
             }
-          } else {
-            resolve({ token, refreshToken });
+            return Promise.Reject({ errorCode: 'REFRESH_TOKEN_INVALID', error_data: err });
           }
+          return Promise.Resolve({ token, refreshToken });
         });
       })
-      .catch((err) => {
-        reject({ errorCode: 'FORCE_LOGOUT' });
-      });
+      .catch((_) => Promise.Reject({ errorCode: 'FORCE_LOGOUT' }));
   });
 };
 
@@ -117,9 +114,9 @@ const isLoggedIn = (req, res, next) => {
     const cookies = cookie.parse(req.headers.cookie);
     const token = cookies['x-access-token'];
     const refreshToken = cookies['x-refresh-token'];
-    jwt.verify(token, JWT_SECRET, async (err, data) => {
+    jwt.verify(token, env.JWT_SECRET, async (err, _) => {
       if (err) {
-        if (err.name == 'TokenExpiredError') {
+        if (err.name === 'TokenExpiredError') {
           // Generate new token and send it
           await refreshAccessToken(refreshToken).then((data) => {
             const newTokensInCookies = cookie.serialize('x-access-token', data.token, cookieOptions());
@@ -128,11 +125,10 @@ const isLoggedIn = (req, res, next) => {
               newTokensInCookies,
             ]);
             next();
-          }).catch((err) => {
-            res.status(401).json({ error_message: 'Please try again!', error_data: err });
+          }).catch((err2) => {
+            res.status(401).json({ error_message: 'Please try again!', error_data: err2 });
           });
         } else {
-          console.log('isLoggedIn Error : ', err);
           res.status(401).json({ error_message: 'Invalid token provided!' });
         }
       } else {
@@ -140,7 +136,6 @@ const isLoggedIn = (req, res, next) => {
       }
     });
   } catch (err) {
-    console.log(err);
     res.status(401).json({ error_message: 'Unauthorised access blocked!' });
   }
 };
@@ -150,9 +145,9 @@ const isAdmin = (req, res, next) => {
   try {
     const cookies = cookie.parse(req.headers.cookie);
     const token = cookies['x-access-token'];
-    jwt.verify(token, JWT_SECRET, (err, data) => {
+    jwt.verify(token, env.JWT_SECRET, (err, data) => {
       if (err) {
-        if (err.name == 'TokenExpiredError') {
+        if (err.name === 'TokenExpiredError') {
           res.status(401).json({ error_message: 'Token Expired!' });
         } else {
           res.status(401).json({ error_message: 'Invalid token provided!' });

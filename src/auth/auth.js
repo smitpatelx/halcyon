@@ -1,9 +1,9 @@
 const express = require('express');
 
-const { JWT_SECRET } = process.env;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const cookie = require('cookie');
+const env = require('../../helpers/config');
 
 const router = express.Router();
 const User = require('../../models/user');
@@ -13,15 +13,15 @@ const {
 } = require('../../helpers/auth');
 
 const cookieOptions = (maxAgeVal) => {
-  const maxAgeParsed = maxAgeVal || Number(process.env.COOKIE_EXPIRY);
+  const maxAgeParsed = maxAgeVal || Number(env.COOKIE_EXPIRY);
   const expDate = new Date(Number(new Date()) + maxAgeParsed);
   return {
-    domain: process.env.COOKIE_DOMAIN,
+    domain: env.COOKIE_DOMAIN,
     expires: expDate,
     maxAge: maxAgeParsed,
     httpOnly: true,
     sameSite: 'Strict',
-    secure: Boolean(process.env.NODE_ENV !== 'development'),
+    secure: Boolean(env.NODE_ENV !== 'development'),
     path: '/'
   };
 };
@@ -37,11 +37,10 @@ router.post('/login', validateLogin, async (req, res) => {
         const user = data.toObject();
         delete user.password; // Deleting password
         // Generating new token
-        generateToken(data).then((data) => {
-          console.log(cookieOptions())
+        generateToken(data).then((data2) => {
           res.setHeader('Set-Cookie', [
-            cookie.serialize('x-access-token', data.token, cookieOptions()),
-            cookie.serialize('x-refresh-token', data.refreshToken, cookieOptions())
+            cookie.serialize('x-access-token', data2.token, cookieOptions()),
+            cookie.serialize('x-refresh-token', data2.refreshToken, cookieOptions())
           ]);
           delete user._id;
           delete user.__v;
@@ -62,13 +61,13 @@ router.post('/login', validateLogin, async (req, res) => {
  * @return - user
  */
 router.get('/me', isLoggedIn, async (req, res) => {
-  const cookies = JSON.parse(cookie.parse(req.headers.cookie).x - access - token);
+  const cookies = JSON.parse(cookie.parse(req.headers.cookie)['x-access-token']);
   const token = cookies.token.split(' ')[1];
   let id = null;
 
-  jwt.verify(token, JWT_SECRET, (err, data) => {
+  jwt.verify(token, env.JWT_SECRET, (err, data) => {
     if (err) {
-      if (err.name == 'TokenExpiredError') {
+      if (err.name === 'TokenExpiredError') {
         res.status(403).json({ error_message: 'Token Expired!' });
       } else {
         res.status(401).json({ error_message: 'Invalid token provided!' });
@@ -99,17 +98,19 @@ router.get('/me', isLoggedIn, async (req, res) => {
  * @return - accessToken
  */
 // router.post('/refresh', async(req, res)=>{
-//     if(typeof req.headers.cookie === "undefined") { res.status(400).json({error_message: "Header cookies undefined"}) }
+//     if(typeof req.headers.cookie === "undefined") { res.s
+// tatus(400).json({error_message: "Header cookies undefined"}) }
 //     let cookies, refreshToken;
 //     try{
 //         cookies = await JSON.parse(cookie.parse(req.headers.cookie).x-access-token);
 //         refreshToken = cookies.refreshToken;
 //     } catch(err){
 //         res.status(404).json({error_message: "You are already logged out!"})
-//         process.exit();
+//         exit();
 //     }
 //     await refreshAccessToken(refreshToken).then(data=>{
-//         res.setHeader('Set-Cookie', cookie.serialize('x-access-token', JSON.stringify(data), cookieOptions()));
+//         res.setHeader('Set-Cookie', cookie.serialize('x-access-to
+// ken', JSON.stringify(data), cookieOptions()));
 //         res.status(200).json({message: "Done!"});
 //     }).catch(err=>{
 //         res.status(403).json({error_message:"Please try again!", error_data: err})
@@ -126,9 +127,9 @@ router.post('/logout', isLoggedIn, async (req, res) => {
   const token = cookies['x-access-token'];
   let id = null;
 
-  jwt.verify(token, JWT_SECRET, (err, data) => {
+  jwt.verify(token, env.JWT_SECRET, (err, data) => {
     if (err) {
-      if (err.name == 'TokenExpiredError') {
+      if (err.name === 'TokenExpiredError') {
         res.status(403).json({ error_message: 'Token Expired!' });
       } else {
         res.status(401).json({ error_message: 'Invalid token provided!' });

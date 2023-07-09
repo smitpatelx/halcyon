@@ -1,62 +1,80 @@
-const User = require("../models/user")
-const { generateHash } = require('../helpers/hash')
-const adminPassword = process.env.ADMIN_PASSWORD;
-let hashedPassword = null;
+const User = require('../models/user');
+const env = require('../helpers/config');
+const { generateHash } = require('../helpers/hash');
 
-const createAdmin = async () => {
-    return new Promise(async (Resolve, Reject)=>{
-        // Validate generated hash
-        await generateHash(adminPassword).then((data)=>{
-            hashedPassword=data;
-        }).catch((err)=>{
-            console.log(err);
-        });
+const adminPassword = env.ADMIN_PASSWORD;
 
-        const adminUser = {
-            first_name: process.env.ADMIN_FIRST_NAME,
-            last_name: process.env.ADMIN_LAST_NAME,
-            password: hashedPassword,
-            email: process.env.ADMIN_EMAIL,
-            user_type: "admin"
-        }
+// eslint-disable-next-line no-async-promise-executor
+const createAdmin = async () => new Promise(async (resolve, reject) => {
+  let hashedPassword = null;
 
-        await User.syncIndexes();
-        if(process.env.ADMIN_RENEW=="yes") {
-            await User.findOneAndUpdate({ email: process.env.ADMIN_EMAIL }, async (err, data)=>{
-                if(data){
-                    console.log("Error creating admin user, it may already exist!")
-                    Reject(null);
-                } else {
-                    await User.create( adminUser,(err, result) => {
-                        if(err){
-                            console.log("Error creating admin user, it may already exist!")
-                            Reject(null);
-                        } else {
-                            console.log("Created admin user successfully!")
-                            Resolve(null);
-                        }
-                    })
-                }
-            });
-        } else {
-            await User.findOne({ email: process.env.ADMIN_EMAIL }, async (err, data)=>{
-                if(data){
-                    console.log("Error creating admin user, it may already exist!")
-                    Reject(null);
-                } else {
-                    await User.create( adminUser,(err, result) => {
-                        if(err){
-                            console.log("Error creating admin user, it may already exist!")
-                            Reject(null);
-                        } else {
-                            console.log("Created admin user successfully!")
-                            Resolve(null);
-                        }
-                    })
-                }
-            });
-        }
-    })
-}
+  // Validate generated hash
+  hashedPassword = await generateHash(adminPassword);
 
-module.exports = {createAdmin}
+  const adminUser = {
+    first_name: env.ADMIN_FIRST_NAME,
+    last_name: env.ADMIN_LAST_NAME,
+    password: hashedPassword,
+    email: env.ADMIN_EMAIL,
+    user_type: 'admin'
+  };
+
+  await User.syncIndexes();
+  if (env.ADMIN_RENEW === 'yes') {
+    const user = await User.findOne({ email: env.ADMIN_EMAIL });
+    if (user) {
+      // Update user
+      const updatedUser = await User.updateOne({ email: env.ADMIN_EMAIL }, adminUser);
+      resolve();
+      return;
+    }
+    // Create user
+    const newUser = await User.create(adminUser);
+    if (!newUser) {
+      reject(new Error(null));
+    }
+    resolve();
+
+    // await User.findOneAndUpdate({ email: env.ADMIN_EMAIL }, async (err, data) => {
+    //   if (data) {
+    //     reject(new Error(null));
+    //     return;
+    //   }
+    //   await User.create(adminUser, (err2, result) => {
+    //     if (err2) {
+    //       reject(new Error(null));
+    //       return;
+    //     }
+    //     resolve(null);
+    //   });
+    // });
+  } else {
+    const user = await User.findOne({ email: env.ADMIN_EMAIL });
+    if (user) {
+      resolve();
+      return;
+    }
+
+    const newUser = await User.create(adminUser);
+    if (!newUser) {
+      reject(new Error(null));
+    }
+    resolve();
+    // await User.findOne({ email: env.ADMIN_EMAIL }, async (err, data) => {
+    //   if (data) {
+    //     reject(new Error(null));
+    //     return;
+    //   }
+    //   await User.create(adminUser, (err2, result) => {
+    //     if (err2) {
+    //       reject(new Error(null));
+    //       return;
+    //     }
+    //     resolve();
+    //   });
+    //   reject();
+    // });
+  }
+});
+
+module.exports = { createAdmin };
