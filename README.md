@@ -1,5 +1,5 @@
-docker-compose -f docker-compose-dev.yaml build --no-cache && docker-compose -f docker-compose-dev.yaml up
-docker-compose -f docker-compose-dev.yaml build --no-cache && docker-compose -f docker-compose-dev.yaml up -d
-docker-compose -f docker-compose-dev.yaml up -d
-docker-compose -f docker-compose-dev.yaml down
+docker-compose -f docker-compose-dev.yml build --no-cache && docker-compose -f docker-compose-dev.yml up
+docker-compose -f docker-compose-dev.yml build --no-cache && docker-compose -f docker-compose-dev.yml up -d
+docker-compose -f docker-compose-dev.yml up -d
+docker-compose -f docker-compose-dev.yml down
 docker-compose up -d

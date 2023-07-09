@@ -6,10 +6,10 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon ./src/index.js",
-    "dc-up-d": "docker-compose -f docker-compose-dev.yaml up -d",
-    "dc-up": "docker-compose -f docker-compose-dev.yaml up",
-    "dc-s": "docker-compose -f docker-compose-dev.yaml down",
-    "dc-down": "docker-compose -f docker-compose-dev.yaml down",
+    "dc-up-d": "docker-compose -f docker-compose-dev.yml up -d",
+    "dc-up": "docker-compose -f docker-compose-dev.yml up",
+    "dc-s": "docker-compose -f docker-compose-dev.yml down",
+    "dc-down": "docker-compose -f docker-compose-dev.yml down",
     "lint": "eslint --fix src",
     "test": "mocha --exit"
   },
