@@ -2,13 +2,15 @@ version: '3.8'
 
 services:
   halcyon:
-    container_name: halcyon-app-dev
+    container_name: halcyon-app
     restart: always
     env_file:
-      - ./.env.dev
+      - ./.env
+    environment:
+      PORT: ${PORT}
     build:
       context: .
-      target: dev
+      target: prod
     ports:
       - '${PORT}:${PORT}'
     volumes: 
@@ -16,14 +18,24 @@ services:
       - ./:/app
     links:
       - mongo
+    depends_on:
+      mongo:
+        condition: service_healthy
 
   mongo:
     image: mongo
     container_name: halcyon-mongo-instance
+    env_file:
+      - ./.env
     environment:
       MONGO_INITDB_DATABASE: ${MONGO_DB}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
+    healthcheck:
+      test: ["CMD","mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - ./data:/data/db
     ports:
