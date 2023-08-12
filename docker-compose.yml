@@ -25,7 +25,7 @@ services:
     env_file:
       - ./.env
     restart: unless-stopped
-    command: [ "-f", "/etc/mongo/mongod.conf", "--port", "27799" ]
+    command: [ "-f", "/etc/mongo/mongod.conf", "--port", "${MONGO_PORT}" ]
     environment:
       MONGO_INITDB_DATABASE: ${MONGO_DB}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
