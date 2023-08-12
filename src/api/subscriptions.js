@@ -1,3 +1,4 @@
+/* eslint-disable new-cap */
 const express = require('express');
 
 const router = express.Router();
@@ -28,7 +29,9 @@ router.get('/', isLoggedIn, isAdmin, (req, res) => {
 
 // router.get('/', async (req, res) => {
 //     let text = "Hi this is just a test";
-//     let html = "<br/><hr/><br/><h1 style='color:#000;font-weight:500;font-size:2rem;'>Hi this is just a test</h1><br/><hr/><br/>"
+//     let html = "<br/><hr/><br/><h1 style='color:#000;font-weight:500;font-size:2rem;'>
+//        Hi this is just a test
+//        </h1><br/><hr/><br/>";
 //     sendmail('smitpatel2x@gmail.com','Test 1', text, html)
 //     .then(data=>{
 //         res.status(200).json(data);
@@ -64,7 +67,7 @@ router.post('/', validateSubscription, async (req, res) => {
 /* GET - Specific Subscription */
 router.get('/:email', isLoggedIn, isAdmin, async (req, res) => {
   const { email } = req.params;
-  isEmailValid = await validator.isEmail(email);
+  const isEmailValid = await validator.isEmail(email);
   if (!isEmailValid) { res.status(401).json('Email is invalid'); }
 
   Subscription.findOne({ email }, (err, data) => {

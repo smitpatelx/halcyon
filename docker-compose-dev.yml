@@ -23,23 +23,27 @@ services:
         condition: service_healthy
 
   mongo:
+    mongo:
     image: mongo
-    container_name: halcyon-mongo-instance
+    container_name: halcyon-mongo-dev
     env_file:
       - ./.env
+    restart: always
+    command: [ "-f", "/etc/mongo/mongod.conf", "--port", "${MONGO_PORT}" ]
     environment:
       MONGO_INITDB_DATABASE: ${MONGO_DB}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
-    healthcheck:
-      test: ["CMD","mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_LOG_DIR: "/dev/null"
     volumes:
-      - ./data:/data/db
+      - ./mongo/data/:/data/db/
+      - ./mongo/mongod.conf:/etc/mongo/mongod.conf
+      - ./mongo/initdb.d/:/docker-entrypoint-initdb.d/
+    expose:
+      - 27799
     ports:
-      - "27017:27017"
+      - "27799:27017"
 
 volumes: 
   nodemodules:

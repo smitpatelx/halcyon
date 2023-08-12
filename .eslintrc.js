@@ -9,7 +9,7 @@ module.exports = {
     'no-param-reassign': 0,
     'no-return-assign': 0,
     'no-unused-vars': 0,
-    'new-cap': ['error', { newIsCap: false }],
+    'new-cap': 'off',
     camelcase: 0,
   }
 };
